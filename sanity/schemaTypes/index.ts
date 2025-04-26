@@ -1,3 +1,4 @@
+// sanity/schemaTypes/index.ts
 import { type SchemaTypeDefinition } from 'sanity'
 
 import {blockContentType} from './blockContentType'
