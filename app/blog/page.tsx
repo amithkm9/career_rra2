@@ -51,9 +51,6 @@ async function AllPosts() {
       categoryMap.set(category.slug.current, category);
     });
 
-    // Additional filtering for demo posts (just in case they weren't filtered at the database level)
-    const excludedSlugs = ["demo1", "demo2"];
-    
     // Filter out posts that don't have valid categories or are demo posts
     const validPosts = posts.filter(post => {
       // First check if it's a demo post to be excluded

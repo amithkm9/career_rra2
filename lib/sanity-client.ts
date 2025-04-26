@@ -21,9 +21,6 @@ export const sanityClient = createClient(config);
 const builder = imageUrlBuilder(sanityClient);
 export const urlFor = (source: any) => builder.image(source);
 
-// Define an array of demo/test post slugs to exclude from queries
-const EXCLUDED_SLUGS = ["demo1", "demo2"];
-
 // Helper functions to fetch data with GROQ queries
 export async function getAllPosts() {
   try {
@@ -40,9 +37,7 @@ export async function getAllPosts() {
         featured,
         readTime
       }`,
-      { excludedSlugs: EXCLUDED_SLUGS }
     );
-    
     console.log("Sanity returned posts count:", posts?.length || 0);
     return posts;
   } catch (error) {
@@ -52,21 +47,30 @@ export async function getAllPosts() {
 }
 
 export async function getFeaturedPosts() {
-  return sanityClient.fetch(
-    `*[_type == "post" && featured == true && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc)[0...3] {
+  return client.fetch(`
+    *[_type == "post" && featured == true] | order(publishedAt desc) {
       _id,
       title,
       slug,
       excerpt,
-      "categories": categories[]->title,
       mainImage,
       publishedAt,
-      "author": author->{name, slug, image},
-      readTime
-    }`,
-    { excludedSlugs: EXCLUDED_SLUGS }
-  );
+      readTime,
+      categories[]->{
+        _id,
+        title,
+        slug,
+        color
+      },
+      author->{
+        name,
+        image,
+        slug
+      }
+    }
+  `);
 }
+
 
 export async function getPostBySlug(slug: string) {
   // No need to filter excluded slugs here as we're querying for a specific slug
@@ -101,7 +105,7 @@ export async function getPostsByCategory(category: string) {
       "author": author->{name, slug, image},
       readTime
     }`,
-    { category, excludedSlugs: EXCLUDED_SLUGS }
+    { category }
   );
 }
 
@@ -149,7 +153,7 @@ export async function getAuthorBySlug(slug: string) {
         readTime
       }
     }`,
-    { slug, excludedSlugs: EXCLUDED_SLUGS }
+    { slug }
   );
 }
 
@@ -166,6 +170,6 @@ export async function searchPosts(searchTerm: string) {
       "author": author->{name, slug, image},
       readTime
     }`,
-    { searchTerm: `*${searchTerm}*`, excludedSlugs: EXCLUDED_SLUGS }
+    { searchTerm: `*${searchTerm}*` }
   );
 }
