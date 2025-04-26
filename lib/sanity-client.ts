@@ -11,7 +11,7 @@ export const config = {
   projectId: 'dz88krr6',
   dataset: 'production',
   apiVersion: '2023-05-03', // Use a UTC date string
-  useCdn: false, // Use CDN for faster response in production
+  useCdn: false,
 };
 
 // Create a client for fetching data
