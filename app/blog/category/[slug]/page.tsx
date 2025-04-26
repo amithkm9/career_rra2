@@ -39,6 +39,21 @@ async function CategoryPosts({ slug }: { slug: string }) {
     notFound();
   }
   
+  // Additional validation to ensure posts have valid categories
+  const validPosts = posts.filter(post => {
+    // If the post has no categories, it's still valid
+    if (!post.categories || !Array.isArray(post.categories) || post.categories.length === 0) {
+      return true;
+    }
+    
+    // Check if the current category slug is in the post's categories
+    return post.categories.some(cat => 
+      typeof cat === 'string' 
+        ? cat === category.title 
+        : cat.slug && cat.slug.current === slug
+    );
+  });
+  
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">{category.title}</h1>
@@ -46,13 +61,13 @@ async function CategoryPosts({ slug }: { slug: string }) {
         <p className="text-gray-600 mb-8">{category.description}</p>
       )}
       
-      {posts.length === 0 ? (
+      {validPosts.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-lg text-gray-600">No posts found in this category yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
+          {validPosts.map((post) => (
             <BlogPostCard key={post._id} post={post} />
           ))}
         </div>

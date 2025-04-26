@@ -16,9 +16,6 @@ async function FeaturedPosts() {
   try {
     const featuredPosts = await getFeaturedPosts();
     
-    // Debug log to see how many featured posts are coming back
-    console.log("Featured posts count:", featuredPosts?.length || 0);
-    
     if (!featuredPosts || featuredPosts.length === 0) {
       return null;
     }
@@ -46,12 +43,28 @@ async function FeaturedPosts() {
 async function AllPosts() {
   try {
     const posts = await getAllPosts();
+    const categories = await getAllCategories();
     
-    // Debug log to see how many posts are coming back
-    console.log("All posts count:", posts?.length || 0);
-    console.log("All posts data:", JSON.stringify(posts));
+    // Create a map of category slugs for faster lookup
+    const categoryMap = new Map();
+    categories.forEach(category => {
+      categoryMap.set(category.slug.current, category);
+    });
+
+    // Filter out posts that don't have valid categories
+    const validPosts = posts.filter(post => {
+      // Check if the post has categories
+      if (!post.categories || !Array.isArray(post.categories) || post.categories.length === 0) {
+        return true; // Keep posts without categories
+      }
+      
+      // Check if at least one category exists in our category map
+      return post.categories.some(category => 
+        category && category.slug && categoryMap.has(category.slug.current)
+      );
+    });
     
-    if (!posts || posts.length === 0) {
+    if (!validPosts || validPosts.length === 0) {
       return (
         <div className="text-center py-12">
           <p className="text-lg text-gray-600">No posts found. Check back soon!</p>
@@ -63,7 +76,7 @@ async function AllPosts() {
       <section>
         <h2 className="text-2xl font-bold mb-6">All Posts</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
+          {validPosts.map((post) => (
             <BlogPostCard key={post._id} post={post} />
           ))}
         </div>

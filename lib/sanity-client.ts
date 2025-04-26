@@ -23,33 +23,33 @@ export const urlFor = (source: any) => builder.image(source);
 
 // Helper functions to fetch data with GROQ queries
 export async function getAllPosts() {
-    try {
-      const posts = await sanityClient.fetch(
-        `*[_type == "post"] | order(publishedAt desc) {
-          _id,
-          title,
-          slug,
-          excerpt,
-          "categories": categories[]->{ _id, title, slug, color },
-          mainImage,
-          publishedAt,
-          "author": author->{name, slug, image},
-          featured,
-          readTime
-        }`
-      );
-      
-      console.log("Sanity returned posts count:", posts?.length || 0);
-      return posts;
-    } catch (error) {
-      console.error("Error in getAllPosts:", error);
-      return [];
-    }
+  try {
+    const posts = await sanityClient.fetch(
+      `*[_type == "post" && !(_id in path('drafts.**'))] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        excerpt,
+        "categories": categories[]->{ _id, title, slug, color },
+        mainImage,
+        publishedAt,
+        "author": author->{name, slug, image},
+        featured,
+        readTime
+      }`
+    );
+    
+    console.log("Sanity returned posts count:", posts?.length || 0);
+    return posts;
+  } catch (error) {
+    console.error("Error in getAllPosts:", error);
+    return [];
   }
+}
 
 export async function getFeaturedPosts() {
   return sanityClient.fetch(
-    `*[_type == "post" && featured == true] | order(publishedAt desc)[0...3] {
+    `*[_type == "post" && featured == true && !(_id in path('drafts.**'))] | order(publishedAt desc)[0...3] {
       _id,
       title,
       slug,
@@ -65,7 +65,7 @@ export async function getFeaturedPosts() {
 
 export async function getPostBySlug(slug: string) {
   return sanityClient.fetch(
-    `*[_type == "post" && slug.current == $slug][0] {
+    `*[_type == "post" && slug.current == $slug && !(_id in path('drafts.**'))][0] {
       _id,
       title,
       slug,
@@ -84,7 +84,7 @@ export async function getPostBySlug(slug: string) {
 
 export async function getPostsByCategory(category: string) {
   return sanityClient.fetch(
-    `*[_type == "post" && $category in categories[]->slug.current] | order(publishedAt desc) {
+    `*[_type == "post" && $category in categories[]->slug.current && !(_id in path('drafts.**'))] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -133,7 +133,7 @@ export async function getAuthorBySlug(slug: string) {
       image,
       bio,
       role,
-      "posts": *[_type == "post" && references(^._id)] | order(publishedAt desc) {
+      "posts": *[_type == "post" && references(^._id) && !(_id in path('drafts.**'))] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -149,7 +149,7 @@ export async function getAuthorBySlug(slug: string) {
 
 export async function searchPosts(searchTerm: string) {
   return sanityClient.fetch(
-    `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm)] | order(publishedAt desc) {
+    `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm) && !(_id in path('drafts.**'))] | order(publishedAt desc) {
       _id,
       title,
       slug,
