@@ -1,23 +1,26 @@
 'use client'
 
 /**
- * This configuration is used to for the Sanity Studio that’s mounted on the `/app/studio/[[...tool]]/page.tsx` route
+ * This configuration is used to for the Sanity Studio that's mounted on the `/app/studio/[[...tool]]/page.tsx` route
  */
 
 import {visionTool} from '@sanity/vision'
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 
-// Go to https://www.sanity.io/docs/api-versioning to learn how API versioning works
-import {apiVersion, dataset, projectId} from './sanity/env'
+// Import schema and structure, but use hardcoded values for project config
 import {schema} from './sanity/schemaTypes'
 import {structure} from './sanity/structure'
 
+// Hardcoded values
+const projectId = 'dz88krr6'
+const dataset = 'production'
+const apiVersion = '2023-05-03'
+
 export default defineConfig({
   basePath: '/studio',
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'dz88krr6',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-
+  projectId,
+  dataset,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,
   plugins: [
