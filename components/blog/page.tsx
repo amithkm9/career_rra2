@@ -1,5 +1,5 @@
 "use client"
-// app/blog/page.tsx
+// components/blog/page.tsx
 import { Suspense } from "react";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -35,7 +35,13 @@ async function FeaturedPosts() {
 async function AllPosts() {
   const posts = await getAllPosts();
   
-  if (!posts || posts.length === 0) {
+  // Additional filtering for demo posts (just in case they weren't filtered at the database level)
+  const excludedSlugs = ["demo1", "demo2"];
+  const validPosts = posts.filter(post => {
+    return post && post.slug && !excludedSlugs.includes(post.slug.current);
+  });
+  
+  if (!validPosts || validPosts.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-lg text-gray-600">No posts found. Check back soon!</p>
@@ -47,7 +53,7 @@ async function AllPosts() {
     <section>
       <h2 className="text-2xl font-bold mb-6">All Posts</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((post) => (
+        {validPosts.map((post) => (
           <BlogPostCard key={post._id} post={post} />
         ))}
       </div>

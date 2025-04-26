@@ -21,11 +21,14 @@ export const sanityClient = createClient(config);
 const builder = imageUrlBuilder(sanityClient);
 export const urlFor = (source: any) => builder.image(source);
 
+// Define an array of demo/test post slugs to exclude from queries
+const EXCLUDED_SLUGS = ["demo1", "demo2"];
+
 // Helper functions to fetch data with GROQ queries
 export async function getAllPosts() {
   try {
     const posts = await sanityClient.fetch(
-      `*[_type == "post" && !(_id in path('drafts.**'))] | order(publishedAt desc) {
+      `*[_type == "post" && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -36,7 +39,8 @@ export async function getAllPosts() {
         "author": author->{name, slug, image},
         featured,
         readTime
-      }`
+      }`,
+      { excludedSlugs: EXCLUDED_SLUGS }
     );
     
     console.log("Sanity returned posts count:", posts?.length || 0);
@@ -49,7 +53,7 @@ export async function getAllPosts() {
 
 export async function getFeaturedPosts() {
   return sanityClient.fetch(
-    `*[_type == "post" && featured == true && !(_id in path('drafts.**'))] | order(publishedAt desc)[0...3] {
+    `*[_type == "post" && featured == true && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc)[0...3] {
       _id,
       title,
       slug,
@@ -59,11 +63,13 @@ export async function getFeaturedPosts() {
       publishedAt,
       "author": author->{name, slug, image},
       readTime
-    }`
+    }`,
+    { excludedSlugs: EXCLUDED_SLUGS }
   );
 }
 
 export async function getPostBySlug(slug: string) {
+  // No need to filter excluded slugs here as we're querying for a specific slug
   return sanityClient.fetch(
     `*[_type == "post" && slug.current == $slug && !(_id in path('drafts.**'))][0] {
       _id,
@@ -84,7 +90,7 @@ export async function getPostBySlug(slug: string) {
 
 export async function getPostsByCategory(category: string) {
   return sanityClient.fetch(
-    `*[_type == "post" && $category in categories[]->slug.current && !(_id in path('drafts.**'))] | order(publishedAt desc) {
+    `*[_type == "post" && $category in categories[]->slug.current && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -95,7 +101,7 @@ export async function getPostsByCategory(category: string) {
       "author": author->{name, slug, image},
       readTime
     }`,
-    { category }
+    { category, excludedSlugs: EXCLUDED_SLUGS }
   );
 }
 
@@ -133,7 +139,7 @@ export async function getAuthorBySlug(slug: string) {
       image,
       bio,
       role,
-      "posts": *[_type == "post" && references(^._id) && !(_id in path('drafts.**'))] | order(publishedAt desc) {
+      "posts": *[_type == "post" && references(^._id) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -143,13 +149,13 @@ export async function getAuthorBySlug(slug: string) {
         readTime
       }
     }`,
-    { slug }
+    { slug, excludedSlugs: EXCLUDED_SLUGS }
   );
 }
 
 export async function searchPosts(searchTerm: string) {
   return sanityClient.fetch(
-    `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm) && !(_id in path('drafts.**'))] | order(publishedAt desc) {
+    `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -160,6 +166,6 @@ export async function searchPosts(searchTerm: string) {
       "author": author->{name, slug, image},
       readTime
     }`,
-    { searchTerm: `*${searchTerm}*` }
+    { searchTerm: `*${searchTerm}*`, excludedSlugs: EXCLUDED_SLUGS }
   );
 }
