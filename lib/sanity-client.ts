@@ -21,6 +21,9 @@ export const sanityClient = createClient(config);
 const builder = imageUrlBuilder(sanityClient);
 export const urlFor = (source: any) => builder.image(source);
 
+// List of slugs to exclude from results (demo or test posts)
+const excludedSlugs = ["demo1", "demo2"];
+
 // Helper functions to fetch data with GROQ queries
 export async function getAllPosts() {
   try {
@@ -37,6 +40,7 @@ export async function getAllPosts() {
         featured,
         readTime
       }`,
+      { excludedSlugs }
     );
     console.log("Sanity returned posts count:", posts?.length || 0);
     return posts;
@@ -47,129 +51,165 @@ export async function getAllPosts() {
 }
 
 export async function getFeaturedPosts() {
-  return client.fetch(`
-    *[_type == "post" && featured == true] | order(publishedAt desc) {
-      _id,
-      title,
-      slug,
-      excerpt,
-      mainImage,
-      publishedAt,
-      readTime,
-      categories[]->{
-        _id,
-        title,
-        slug,
-        color
-      },
-      author->{
-        name,
-        image,
-        slug
-      }
-    }
-  `);
-}
-
-
-export async function getPostBySlug(slug: string) {
-  // No need to filter excluded slugs here as we're querying for a specific slug
-  return sanityClient.fetch(
-    `*[_type == "post" && slug.current == $slug && !(_id in path('drafts.**'))][0] {
-      _id,
-      title,
-      slug,
-      body,
-      excerpt,
-      "categories": categories[]->{ title, slug, description, color },
-      mainImage,
-      publishedAt,
-      "author": author->{name, slug, image, bio, role},
-      readTime,
-      seo
-    }`,
-    { slug }
-  );
-}
-
-export async function getPostsByCategory(category: string) {
-  return sanityClient.fetch(
-    `*[_type == "post" && $category in categories[]->slug.current && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
-      _id,
-      title,
-      slug,
-      excerpt,
-      "categories": categories[]->title,
-      mainImage,
-      publishedAt,
-      "author": author->{name, slug, image},
-      readTime
-    }`,
-    { category }
-  );
-}
-
-export async function getAllCategories() {
-  return sanityClient.fetch(
-    `*[_type == "category"] | order(title asc) {
-      _id,
-      title,
-      slug,
-      description,
-      color
-    }`
-  );
-}
-
-export async function getAllAuthors() {
-  return sanityClient.fetch(
-    `*[_type == "author"] | order(name asc) {
-      _id,
-      name,
-      slug,
-      image,
-      bio,
-      role
-    }`
-  );
-}
-
-export async function getAuthorBySlug(slug: string) {
-  return sanityClient.fetch(
-    `*[_type == "author" && slug.current == $slug][0] {
-      _id,
-      name,
-      slug,
-      image,
-      bio,
-      role,
-      "posts": *[_type == "post" && references(^._id) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
+  try {
+    const featuredPosts = await sanityClient.fetch(`
+      *[_type == "post" && featured == true && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
         _id,
         title,
         slug,
         excerpt,
         mainImage,
         publishedAt,
-        readTime
+        readTime,
+        categories[]->{
+          _id,
+          title,
+          slug,
+          color
+        },
+        author->{
+          name,
+          image,
+          slug
+        }
       }
-    }`,
-    { slug }
-  );
+    `, { excludedSlugs });
+    
+    return featuredPosts;
+  } catch (error) {
+    console.error("Error in getFeaturedPosts:", error);
+    return [];
+  }
+}
+
+export async function getPostBySlug(slug: string) {
+  try {
+    // No need to filter excluded slugs here as we're querying for a specific slug
+    return sanityClient.fetch(
+      `*[_type == "post" && slug.current == $slug && !(_id in path('drafts.**'))][0] {
+        _id,
+        title,
+        slug,
+        body,
+        excerpt,
+        "categories": categories[]->{ title, slug, description, color },
+        mainImage,
+        publishedAt,
+        "author": author->{name, slug, image, bio, role},
+        readTime,
+        seo
+      }`,
+      { slug }
+    );
+  } catch (error) {
+    console.error(`Error in getPostBySlug for slug ${slug}:`, error);
+    return null;
+  }
+}
+
+export async function getPostsByCategory(category: string) {
+  try {
+    return sanityClient.fetch(
+      `*[_type == "post" && $category in categories[]->slug.current && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        excerpt,
+        "categories": categories[]->title,
+        mainImage,
+        publishedAt,
+        "author": author->{name, slug, image},
+        readTime
+      }`,
+      { category, excludedSlugs }
+    );
+  } catch (error) {
+    console.error(`Error in getPostsByCategory for category ${category}:`, error);
+    return [];
+  }
+}
+
+export async function getAllCategories() {
+  try {
+    return sanityClient.fetch(
+      `*[_type == "category"] | order(title asc) {
+        _id,
+        title,
+        slug,
+        description,
+        color
+      }`
+    );
+  } catch (error) {
+    console.error("Error in getAllCategories:", error);
+    return [];
+  }
+}
+
+export async function getAllAuthors() {
+  try {
+    return sanityClient.fetch(
+      `*[_type == "author"] | order(name asc) {
+        _id,
+        name,
+        slug,
+        image,
+        bio,
+        role
+      }`
+    );
+  } catch (error) {
+    console.error("Error in getAllAuthors:", error);
+    return [];
+  }
+}
+
+export async function getAuthorBySlug(slug: string) {
+  try {
+    return sanityClient.fetch(
+      `*[_type == "author" && slug.current == $slug][0] {
+        _id,
+        name,
+        slug,
+        image,
+        bio,
+        role,
+        "posts": *[_type == "post" && references(^._id) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
+          _id,
+          title,
+          slug,
+          excerpt,
+          mainImage,
+          publishedAt,
+          readTime
+        }
+      }`,
+      { slug, excludedSlugs }
+    );
+  } catch (error) {
+    console.error(`Error in getAuthorBySlug for slug ${slug}:`, error);
+    return null;
+  }
 }
 
 export async function searchPosts(searchTerm: string) {
-  return sanityClient.fetch(
-    `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
-      _id,
-      title,
-      slug,
-      excerpt,
-      "categories": categories[]->title,
-      mainImage,
-      publishedAt,
-      "author": author->{name, slug, image},
-      readTime
-    }`,
-    { searchTerm: `*${searchTerm}*` }
-  );
+  try {
+    return sanityClient.fetch(
+      `*[_type == "post" && (title match $searchTerm || excerpt match $searchTerm) && !(_id in path('drafts.**')) && !(slug.current in $excludedSlugs)] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        excerpt,
+        "categories": categories[]->title,
+        mainImage,
+        publishedAt,
+        "author": author->{name, slug, image},
+        readTime
+      }`,
+      { searchTerm: `*${searchTerm}*`, excludedSlugs }
+    );
+  } catch (error) {
+    console.error(`Error in searchPosts for term ${searchTerm}:`, error);
+    return [];
+  }
 }

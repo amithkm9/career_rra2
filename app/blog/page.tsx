@@ -12,12 +12,20 @@ export const metadata: Metadata = {
   description: "Read our latest articles about career development, skill-building, and professional growth.",
 };
 
+// Define excluded slugs
+const excludedSlugs = ["demo1", "demo2"];
+
 async function FeaturedPosts() {
   try {
     const featuredPosts = await getFeaturedPosts();
     
     if (!featuredPosts || featuredPosts.length === 0) {
-      return null;
+      return (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
+          <p className="text-gray-600">No featured posts available at the moment.</p>
+        </section>
+      );
     }
     
     return (
@@ -43,30 +51,12 @@ async function FeaturedPosts() {
 async function AllPosts() {
   try {
     const posts = await getAllPosts();
-    const categories = await getAllCategories();
     
-    // Create a map of category slugs for faster lookup
-    const categoryMap = new Map();
-    categories.forEach(category => {
-      categoryMap.set(category.slug.current, category);
-    });
-
-    // Filter out posts that don't have valid categories or are demo posts
+    // Filter out posts that don't have valid slugs or are demo posts
     const validPosts = posts.filter(post => {
-      // First check if it's a demo post to be excluded
-      if (post.slug && excludedSlugs.includes(post.slug.current)) {
-        return false;
-      }
-      
-      // Check if the post has categories
-      if (!post.categories || !Array.isArray(post.categories) || post.categories.length === 0) {
-        return true; // Keep posts without categories
-      }
-      
-      // Check if at least one category exists in our category map
-      return post.categories.some(category => 
-        category && category.slug && categoryMap.has(category.slug.current)
-      );
+      if (!post || !post.slug) return false;
+      if (excludedSlugs.includes(post.slug.current)) return false;
+      return true;
     });
     
     if (!validPosts || validPosts.length === 0) {

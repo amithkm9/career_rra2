@@ -13,75 +13,117 @@ export const metadata: Metadata = {
   description: "Read our latest articles about career development, skill-building, and professional growth.",
 };
 
-async function FeaturedPosts() {
-  const featuredPosts = await getFeaturedPosts();
-  
-  if (!featuredPosts || featuredPosts.length === 0) {
-    return null;
-  }
-  
-  return (
-    <section className="mb-12">
-      <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {featuredPosts.map((post) => (
-          <BlogPostCard key={post._id} post={post} featured={true} />
-        ))}
-      </div>
-    </section>
-  );
-}
+// Define excluded slugs
+const excludedSlugs = ["demo1", "demo2"];
 
-async function AllPosts() {
-  const posts = await getAllPosts();
-  
-  // Additional filtering for demo posts (just in case they weren't filtered at the database level)
-  const excludedSlugs = ["demo1", "demo2"];
-  const validPosts = posts.filter(post => {
-    return post && post.slug && !excludedSlugs.includes(post.slug.current);
-  });
-  
-  if (!validPosts || validPosts.length === 0) {
+async function FeaturedPosts() {
+  try {
+    const featuredPosts = await getFeaturedPosts();
+    
+    if (!featuredPosts || featuredPosts.length === 0) {
+      return (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
+          <p className="text-gray-600">No featured posts available at the moment.</p>
+        </section>
+      );
+    }
+    
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-gray-600">No posts found. Check back soon!</p>
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredPosts.map((post) => (
+            <BlogPostCard key={post._id} post={post} featured={true} />
+          ))}
+        </div>
+      </section>
+    );
+  } catch (error) {
+    console.error("Error fetching featured posts:", error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Failed to load featured posts. Please try again later.</p>
       </div>
     );
   }
-  
-  return (
-    <section>
-      <h2 className="text-2xl font-bold mb-6">All Posts</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {validPosts.map((post) => (
-          <BlogPostCard key={post._id} post={post} />
-        ))}
+}
+
+async function AllPosts() {
+  try {
+    const posts = await getAllPosts();
+    
+    // Filter out posts that don't have valid slugs or are demo posts
+    const validPosts = posts.filter(post => {
+      if (!post || !post.slug) return false;
+      if (excludedSlugs.includes(post.slug.current)) return false;
+      return true;
+    });
+    
+    if (!validPosts || validPosts.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-lg text-gray-600">No posts found. Check back soon!</p>
+        </div>
+      );
+    }
+    
+    return (
+      <section>
+        <h2 className="text-2xl font-bold mb-6">All Posts</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {validPosts.map((post) => (
+            <BlogPostCard key={post._id} post={post} />
+          ))}
+        </div>
+      </section>
+    );
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Failed to load posts. Please try again later.</p>
       </div>
-    </section>
-  );
+    );
+  }
 }
 
 export default async function BlogPage() {
-  const categories = await getAllCategories();
-  
-  return (
-    <BlogLayout categories={categories}>
-      <div className="space-y-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">ClassMent Blog</h1>
-          <p className="text-lg text-gray-600">
-            Insights, guides, and resources for your career journey
-          </p>
+  try {
+    const categories = await getAllCategories();
+    
+    return (
+      <BlogLayout categories={categories}>
+        <div className="space-y-6">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-4">ClassMent Blog</h1>
+            <p className="text-lg text-gray-600">
+              Insights, guides, and resources for your career journey
+            </p>
+          </div>
+          
+          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+            <FeaturedPosts />
+          </Suspense>
+          
+          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+            <AllPosts />
+          </Suspense>
         </div>
-        
-        <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
-          <FeaturedPosts />
-        </Suspense>
-        
-        <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
-          <AllPosts />
-        </Suspense>
+      </BlogLayout>
+    );
+  } catch (error) {
+    console.error("Error in BlogPage:", error);
+    return (
+      <div className="container mx-auto py-16 text-center">
+        <h1 className="text-4xl font-bold mb-4">ClassMent Blog</h1>
+        <div className="py-12 border rounded-lg my-8">
+          <p className="text-xl text-red-500 mb-6">Sorry, we couldn't load the blog at this time.</p>
+          <Link href="/" className="text-primary hover:underline">
+            Return to homepage
+          </Link>
+        </div>
       </div>
-    </BlogLayout>
-  );
+    );
+  }
 }
