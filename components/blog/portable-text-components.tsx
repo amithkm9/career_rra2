@@ -79,32 +79,32 @@ export const portableTextComponents = {
   },
   block: {
     h1: ({ children }: any) => (
-      <h1 className="text-3xl font-bold mt-10 mb-6">{children}</h1>
+      <h1 className="text-3xl font-bold mt-12 mb-6 text-gray-900 dark:text-white">{children}</h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-2xl font-bold mt-10 mb-6">{children}</h2>
+      <h2 className="text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100 border-b pb-2 border-gray-200 dark:border-gray-700">{children}</h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-xl font-semibold mt-8 mb-4">{children}</h3>
+      <h3 className="text-xl font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100">{children}</h3>
     ),
     h4: ({ children }: any) => (
-      <h4 className="text-lg font-semibold mt-8 mb-4">{children}</h4>
+      <h4 className="text-lg font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100">{children}</h4>
     ),
     normal: ({ children }: any) => (
-      <p className="my-6 leading-relaxed">{children}</p>
+      <p className="my-6 leading-relaxed text-gray-700 dark:text-gray-300">{children}</p>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-primary/50 pl-4 my-8 italic">
+      <blockquote className="border-l-4 border-primary/50 pl-4 my-8 italic bg-gray-50 dark:bg-gray-800 py-3 px-3 rounded-r">
         {children}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }: any) => (
-      <ul className="list-disc pl-6 my-6 space-y-3">{children}</ul>
+      <ul className="list-disc pl-6 my-6 space-y-3 text-gray-700 dark:text-gray-300">{children}</ul>
     ),
     number: ({ children }: any) => (
-      <ol className="list-decimal pl-6 my-6 space-y-3">{children}</ol>
+      <ol className="list-decimal pl-6 my-6 space-y-3 text-gray-700 dark:text-gray-300">{children}</ol>
     ),
   },
   listItem: {

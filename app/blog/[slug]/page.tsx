@@ -137,7 +137,7 @@ export default async function PostPage({ params }: PostPageProps) {
         )}
 
         {/* Post Content */}
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-lg max-w-none blog-content">
           <PortableText value={post.body} components={portableTextComponents} />
         </div>
 
@@ -160,8 +160,8 @@ export default async function PostPage({ params }: PostPageProps) {
                 {post.author.role && (
                   <p className="text-gray-600 text-sm mb-2">{post.author.role}</p>
                 )}
-                <div className="text-sm text-gray-700">
-                  <PortableText value={post.author.bio} />
+                <div className="text-sm text-gray-700 prose">
+                  <PortableText value={post.author.bio} components={portableTextComponents} />
                 </div>
               </div>
             </div>

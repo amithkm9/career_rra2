@@ -92,3 +92,170 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Enhanced styling for blog content */
+.prose {
+  /* Base text styling */
+  @apply text-gray-800 dark:text-gray-200;
+  
+  /* Improved paragraph spacing */
+  & p {
+    @apply my-6 leading-relaxed;
+  }
+  
+  /* Enhanced heading styles */
+  & h1 {
+    @apply text-3xl font-bold mt-12 mb-6 text-gray-900 dark:text-white;
+  }
+  
+  & h2 {
+    @apply text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100 border-b pb-2 border-gray-200 dark:border-gray-700;
+  }
+  
+  & h3 {
+    @apply text-xl font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100;
+  }
+  
+  & h4 {
+    @apply text-lg font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100;
+  }
+  
+  /* List styling */
+  & ul {
+    @apply list-disc pl-6 my-6 space-y-3;
+  }
+  
+  & ol {
+    @apply list-decimal pl-6 my-6 space-y-3;
+  }
+  
+  & li {
+    @apply mb-2;
+  }
+  
+  /* Blockquote styling */
+  & blockquote {
+    @apply border-l-4 border-primary/50 pl-4 my-8 italic bg-gray-50 dark:bg-gray-800 py-3 px-3 rounded-r;
+  }
+  
+  /* Code styling */
+  & code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded font-mono text-sm;
+  }
+  
+  /* Horizontal rule */
+  & hr {
+    @apply my-8 border-gray-200 dark:border-gray-700;
+  }
+  
+  /* Link styling */
+  & a {
+    @apply text-primary underline decoration-primary/30 hover:decoration-primary;
+  }
+  
+  /* Image captions */
+  & img + em {
+    @apply block text-center text-sm text-gray-500 mt-2;
+  }
+}
+
+/* Added spacing between all blocks in the portable text */
+.portable-text > * + * {
+  @apply mt-6;
+}
+
+/* Extra styling for the blog page */
+.blog-content h2 {
+  @apply text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100 border-b pb-2 border-gray-200 dark:border-gray-700;
+}
+
+.blog-content h3 {
+  @apply text-xl font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100;
+}
+
+.blog-content h4 {
+  @apply text-lg font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100;
+}
+
+.blog-content p {
+  @apply my-6 leading-relaxed text-gray-700 dark:text-gray-300;
+}
+
+/* Improve table styling in blog content */
+.blog-content table {
+  @apply w-full my-8 border-collapse;
+}
+
+.blog-content table th {
+  @apply bg-gray-100 dark:bg-gray-800 text-left py-3 px-4 font-semibold border border-gray-200 dark:border-gray-700;
+}
+
+.blog-content table td {
+  @apply py-3 px-4 border border-gray-200 dark:border-gray-700;
+}
+
+/* Improve figure and image styling */
+.blog-content figure {
+  @apply my-8;
+}
+
+.blog-content figure figcaption {
+  @apply text-center text-sm text-gray-500 mt-2;
+}
+
+/* Style for inline code */
+.blog-content :not(pre) > code {
+  @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono text-sm text-pink-600 dark:text-pink-400;
+}
+
+/* Style for pre blocks */
+.blog-content pre {
+  @apply rounded-lg overflow-x-auto p-4 bg-gray-900 text-gray-100 my-6;
+}
+
+/* Ikigai-specific styling for lists */
+.blog-content .ikigai-list {
+  @apply space-y-4;
+}
+
+.blog-content .ikigai-list li {
+  @apply bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow-sm;
+}
+
+/* Additional styling for the first paragraph after headings */
+.blog-content h2 + p,
+.blog-content h3 + p,
+.blog-content h4 + p {
+  @apply mt-3;
+}
+
+/* Better spacing for nested lists */
+.blog-content li > ul,
+.blog-content li > ol {
+  @apply mt-2 mb-0;
+}
+
+/* Better styling for footnotes */
+.blog-content .footnotes {
+  @apply mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400;
+}
+
+/* Fix for code blocks with line numbers */
+.blog-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Enhanced blockquote styling */
+.blog-content blockquote {
+  @apply border-l-4 border-primary/50 pl-4 py-3 px-3 my-8 italic bg-gray-50 dark:bg-gray-800 rounded-r text-gray-700 dark:text-gray-300;
+}
+
+.blog-content blockquote p {
+  @apply my-2;
+}
+
+/* Fix for embeds and iframes */
+.blog-content iframe,
+.blog-content .embed {
+  @apply my-8 w-full max-w-full rounded-lg overflow-hidden;
+}
